@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Distress Thermometer Survey</title>
+<style>
+  :root{
+    --bg:#f7f8fb; --card:#fff; --accent:#0b74ff; --muted:#666;
+  }
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans",sans-serif; background:var(--bg); margin:0; padding:16px; color:#111;}
+  .container{max-width:900px; margin:0 auto;}
+  .card{background:var(--card); padding:16px; border-radius:12px; box-shadow:0 6px 18px rgba(10,10,20,0.06); margin-bottom:12px;}
+  h1{font-size:20px; margin:0 0 8px 0;}
+  label{display:block; margin:8px 0 4px;}
+  input[type="text"], input[type="number"], select, textarea{width:100%; padding:10px; border-radius:8px; border:1px solid #e3e7ee; box-sizing:border-box;}
+  .row{display:flex; gap:8px; flex-wrap:wrap;}
+  .left{flex:1 1 240px;}
+  .small{flex:0 0 120px;}
+  button{background:var(--accent); color:#fff; border:none; padding:10px 14px; border-radius:10px; font-weight:600;}
+  .question{margin-bottom:14px;}
+  .options{display:flex; flex-direction:column; gap:8px;}
+  .opt{display:flex; align-items:center; gap:10px; padding:8px; border-radius:8px; border:1px solid #eee; background:#fbfdff;}
+  .opt img{width:56px; height:56px; object-fit:cover; border-radius:6px;}
+  .controls{display:flex; justify-content:space-between; gap:8px; margin-top:8px; flex-wrap:wrap;}
+  .muted{color:var(--muted); font-size:13px;}
+  .toolbar{display:flex; gap:8px; margin-bottom:8px; justify-content:flex-end;}
+  .lang-toggle{padding:8px 10px; border-radius:8px; border:1px solid #ddd; background:#fff;}
+  @media (max-width:520px){ .opt img{width:48px;height:48px;} }
+</style>
+</head>
+<body>
+<div class="container" id="app">
+  <div class="toolbar card">
+    <div style="display:flex; gap:8px; align-items:center; justify-content:flex-end;">
+      <select id="lang" class="lang-toggle" title="Language">
+        <option value="en">English</option>
+        <option value="ur">اردو (Urdu)</option>
+      </select>
+      <button id="exportCsv">Export CSV</button>
+      <button id="clearData" style="background:#ddd;color:#222;">Clear Local Data</button>
+    </div>
+  </div>
+
+  <div id="pagePatient" class="card">
+    <h1 id="title">Patient Info</h1>
+    <div class="muted" id="sub">Please enter full name and patient ID.</div>
+    <label id="labelName">Full name</label>
+    <input id="fullName" type="text" placeholder="John Doe" />
+    <label id="labelPID">Patient ID</label>
+    <input id="patientId" type="text" placeholder="12345" />
+    <label id="labelAge">Age (optional)</label>
+    <input id="age" type="number" min="0" />
+    <div style="margin-top:12px; display:flex; gap:8px;">
+      <button id="startSurvey">Start Survey</button>
+      <button id="loadLatest" style="background:#eee;color:#222;">Load last saved</button>
+    </div>
+  </div>
+
+  <div id="pageSurvey" class="card" style="display:none;">
+    <h1 id="surveyTitle">Distress Thermometer</h1>
+    <div id="questionsContainer"></div>
+    <div class="controls">
+      <div class="muted" id="progress">Question 0 / 0</div>
+      <div>
+        <button id="saveDraft" style="background:#6c757d;">Save Draft</button>
+        <button id="finish" >Finish & Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="pageDone" class="card" style="display:none;">
+    <h1 id="doneTitle">Thanks — Saved</h1>
+    <div class="muted" id="doneNote">You can export all results as CSV from top bar.</div>
+    <div style="margin-top:12px;">
+      <button id="backToStart">Start new</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/*
+  NOTE: Urdu text was auto-extracted from your PDFs. Please proofread the Urdu text below.
+  To fix any Urdu wording, edit the `questions` array items' "ur" fields and re-open this file.
+*/
+
+// === Survey questions with English, Urdu, and optional image placeholders ===
+const questions = [
+  {
+    id: "distress_score",
+    type: "scale",
+    en: "Please circle the number (0–10) that best describes how much distress you have been experiencing in the past week, including today.",
+    ur: "براہ کرم آپ کو آج سمیت پچھلے ہفتے میں کس قدر تناؤ کا سامنا ہوا ہے اس کی بہترین وضاحت کرنے والے عدد 0–10 پر دائرہ بنائیں۔",
+    min: 0, max: 10
+  },
+
+  /* Practical Concerns */
+  {
+    id: "practical_concerns",
+    type: "checkbox",
+    en: "Practical Concerns — Mark all that apply",
+    ur: "عملی تشویشات — جو لاگو ہوں نشان زد کریں",
+    options: [
+      {value:"taking_care_of_myself", en:"Taking care of myself", ur:"اپنا خیال رکھنا", img:"images/Pratical Concern/Taking care of myself.JPG"},
+      {value:"taking_care_of_others", en:"Taking care of others", ur:"دوسروں کا خیال رکھنا", img:"images/Pratical Concern/Taking care of others.JPG"},
+      {value:"work", en:"Work", ur:"کام", img:"images/Pratical Concern/Work.JPG"},
+      {value:"school", en:"School", ur:"سکول", img:"images/Pratical Concern/School.JPG"},
+      {value:"housing", en:"Housing", ur:"رہائش", img:"images/Pratical Concern/Housing.JPG"},
+      {value:"finances", en:"Finances", ur:"مالیات", img:"images/Pratical Concern/Finances.JPG"},
+      {value:"insurance", en:"Insurance", ur:"بیمہ", img:"images/Pratical Concern/Insurance.JPG"},
+      {value:"transportation", en:"Transportation", ur:"نقل و حمل", img:"images/Pratical Concern/Transport.JPG"},
+      {value:"child_care", en:"Child care", ur:"نگہداشت طفل", img:"images/Pratical Concern/Child care.JPG"},
+      {value:"food", en:"Having enough food", ur:"کافی مقدار میں کھانا", img:"images/Pratical Concern/Having enough food.JPG"},
+      {value:"medicines", en:"Access to medicine", ur:"ادویات تک رسائی", img:"images/Pratical Concern/Access to medicine.JPG"},
+      {value:"treatment_decisions", en:"Treatment decisions", ur:"علاج کے فیصلے", img:"images/Pratical Concern/Treatment decisions.JPG"}
+    ]
+  },
+
+  /* Family Concerns */
+  {
+    id: "family_concerns",
+    type: "checkbox",
+    en: "Family Concerns — Mark all that apply",
+    ur: "خاندانی تشویشات — جو لاگو ہوں نشان زد کریں",
+    options: [
+      {value:"relationship_with_spouse_or_partner", en:"Relationship with spouse or partner", ur:"شریک حیات یا ساتھی کے ساتھ تعلقات", img:"images/Social Concern/Relationship with spouse.JPG"},
+      {value:"relationship_with_children", en:"Relationship with children", ur:"بچوں کے ساتھ تعلقات", img:"images/Social Concern/Relationship with children.jpeg"},
+      {value:"relationship_with_family_members", en:"Relationship with family members", ur:"خاندان کے افراد کے ساتھ تعلقات", img:"images/Social Concern/Relationship with family members.JPG"},
+      {value:"relationship_with_friends_or_coworkers", en:"Relationship with frends or coworkers", ur:"دوستوں یا ساتھی کارکنوں کے ساتھ تعلقات", img:"images/Social Concern/Relationship with friends or co workers.JPG"},
+      {value:"communication_with_health_care_team", en:"Communication with health care team", ur:"صحت کی دیکھ بھال کرنے والی ٹیم کے ساتھمواصلت", img:"images/Social Concern/Communciation with health care team.JPG"},
+      {value:"ability_to_have_children", en:"Ability to have children", ur:"بچے پیدا کرنے کی اہلیت", img:"images/Social Concern/Abilty to have children 1.JPG"},
+      {value:"prejudice_or_discrimination", en:"Prejudice or discrimination", ur:"Prejudice or discrimination", img:""}
+    ]
+  },
+
+  /* Emotional Concerns */
+  {
+    id: "emotional_concerns",
+    type: "checkbox",
+    en: "Emotional Concerns — Mark all that apply",
+    ur: "جذباتی تشویشات — جو لاگو ہوں نشان زد کریں",
+    options: [
+      {value:"worry", en:"Worry or Anxiety", ur:"فکر یا اضطراب", img:"images/Emotional Concern/Worry or anixety.JPG"},
+      {value:"sadness", en:"Sadness or depression", ur:"اداسی یا افسردگی", img:"images/Emotional Concern/Sadness or deperssion.JPG"},
+      {value:"loss_of_interest", en:"Loss of interest or enjoyment", ur:"دلچسپی یا لطف اندوزی میں کمی", img:"images/Emotional Concern/Loss of enjoyment or interest.JPG"},
+      {value:"grief_or_loss", en:"Grief or loss", ur:"غم یا نقصان", img:"images/Emotional Concern/Grief or loss.JPG"},
+      {value:"fear", en:"Fear", ur:"خوف", img:"images/Emotional Concern/Fear.JPG"},
+      {value:"loneliness", en:"Loneliness", ur:"تنہائی", img:"images/Emotional Concern/Loneliness.JPG"},
+      {value:"anger", en:"Anger", ur:"غصہ", img:"images/Emotional Concern/Anger.JPG"},
+      {value:"changes_in_apperance", en:"Changes in appearance", ur:"بظاہری شکل میں تبدیلیاں", img:"images/Emotional Concern/Change in physical apperance.jpeg"},
+      {value:"loss_of_control", en:"Loss of control", ur:"ظاہری شکل میں تبدیلیاں", img:"images/Emotional Concern/Loss of control.png"},
+      {value:"worthlessness_or_burden", en:"Feelings of worthlessness or being a burden", ur:"بیکار ہونے یا بوجھ ہونے کا احساس", img:"images/Emotional Concern/Feeling of burden or worthlessness.JPG"}
+    ]
+  },
+
+  /* Spiritual/Religious Concerns */
+  {
+    id: "spiritual_concerns",
+    type: "checkbox",
+    en: "Spiritual/Religious Concerns — Mark all that apply",
+    ur: "روحانی/مذہبی تشویشات — جو لاگو ہوں نشان زد کریں",
+    options: [
+      {value:"meaning_or_purpose", en:"Sense of meaning or purpose", ur:"معنی یا مقصد کا احساس", img:"images/Spiritual and Religious Concern/Sense of meaning or purpose.png"},
+      {value:"conflict_with_beliefs", en:"Changes in faith or beliefs", ur:"عقیدہ یا عقائد میں تبدیلی", img:"images/Spiritual and Religious Concern/Changes in faith or beliefs.JPG"},
+      {value:"death_dying_afterlife", en:"Death, dying, or afterlife", ur:"موت، مرنا یا بعد کی زندگی", img:"images/Spiritual and Religious Concern/Death.JPG"},
+      {value:"conflict_between_beliefs_and_treatment", en:"Conflict between beliefs and cancer treatments", ur:"عقائد اور کینسر کے علاج کے درمیان تصادم", img:"images/Spiritual and Religious Concern/Conflict between beliefs and cancer treatments.JPG"},
+      {value:"relationship_with_sacred", en:"Relationship with the sacred", ur:"مقدس کے ساتھ رشتہ", img:"images/Spiritual and Religious Concern/Relationship with the sacred.JPG"},
+      {value:"ritual_or_dietary_needs", en:"Ritual or dietary needs", ur:"رسم یا غذائی ضروریات", img:"images/Spiritual and Religious Concern/Ritual or dietary needs.JPG"},
+      ]
+  },
+
+  /* Physical Problems */
+  {
+    id: "physical_problems",
+    type: "checkbox",
+    en: "Physical Concerns — Mark all that apply",
+    ur: "جسمانی مسائل — جو لاگو ہوں نشان زد کریں",
+    options: [
+      {value:"pain", en:"Pain", ur:"درد", img:"images/Physical Concern/Pain.JPG"},
+      {value:"sleep", en:"Sleep", ur:"نیند", img:"images/Physical Concern/Sleep.JPG"},
+      {value:"fatigue", en:"Fatigue", ur:"تھکن", img:"images/Physical Concern/Fatigue.jpg"},
+      {value:"changes_in_eating", en:"Changes in eating", ur:"کھانے میں تبدیلیاں", img:"images/Physical Concern/Changes in eating.JPG"},
+      {value:"tobacco_use", en:"Tobacco use", ur:"تمباکو کا استعمال", img:"images/Physical Concern/Tobacco use.jpg"},
+      {value:"substance_use", en:"Substance use", ur:"ممنوعات کا استعمال", img:"images/Physical Concern/Substance use.JPG"},
+      {value:"memory_concentration", en:"Memory/concentration", ur:"یادداشت/توجہ", img:"images/Physical Concern/Memory or concentration.JPG"},
+      {value:"sexual", en:"Sexual health", ur:"جنسی مسائل", img:"images/Physical Concern/Sexual Health.JPG"},
+      {value:"changes_in_eating", en:"Changes in eating", ur:"کھانے ميں تبديلياں", img:"images/Physical Concern/Changes in eating.JPG"},
+      {value:"loss_or_change_of_physical_abilities", en:"Loss or change of physical abilities", ur:"جسمانی صلاحیتوں میں کمی یا تبدیلی", img:"images/Physical Concern/Change in physical abilities.JPG"}
+    ]
+  },
+  {
+    id: "other_concerns",
+    type: "text",
+    en: "Other concerns (optional)",
+    ur: "دیگر تشویشات (اختیاری)"
+  }
+];
+
+// ===== App logic (rendering, language toggle, local storage, CSV export) =====
+
+const LANG = { current: localStorage.getItem('lang') || 'en' };
+
+function el(q, ctx=document){ return ctx.querySelector(q); }
+
+const langEl = el('#lang');
+langEl.value = LANG.current;
+langEl.addEventListener('change', e=>{
+  LANG.current = e.target.value;
+  localStorage.setItem('lang', LANG.current);
+  applyLanguage();
+});
+
+function applyLanguage(){
+  const ur = (LANG.current === 'ur');
+  document.documentElement.lang = LANG.current === 'ur' ? 'ur' : 'en';
+  document.documentElement.dir = ur ? 'rtl' : 'ltr';
+
+  el('#title').textContent = ur ? 'مریض کی معلومات' : 'Patient Info';
+  el('#sub').textContent = ur ? 'براہ کرم مکمل نام اور مریض آئی ڈی درج کریں۔' : 'Please enter full name and patient ID.';
+  el('#labelName').textContent = ur ? 'پورا نام' : 'Full name';
+  el('#labelPID').textContent = ur ? 'مریض آئی ڈی' : 'Patient ID';
+  el('#labelAge').textContent = ur ? 'عمر (اختیاری)' : 'Age (optional)';
+  el('#startSurvey').textContent = ur ? 'سروے شروع کریں' : 'Start Survey';
+  el('#loadLatest').textContent = ur ? 'آخری محفوظ شدہ لوڈ کریں' : 'Load last saved';
+  el('#surveyTitle').textContent = ur ? 'ڈسٹریس تھرما میٹر' : 'Distress Thermometer';
+  el('#saveDraft').textContent = ur ? 'خاکہ محفوظ کریں' : 'Save Draft';
+  el('#finish').textContent = ur ? 'ختم کریں اور محفوظ کریں' : 'Finish & Save';
+  el('#doneTitle').textContent = ur ? 'شکریہ — محفوظ ہوگیا' : 'Thanks — Saved';
+  el('#doneNote').textContent = ur ? 'آپ اوپر کے بٹن سے تمام نتائج CSV کے طور پر نکال سکتے ہیں۔' : 'You can export all results as CSV from top bar.';
+
+  if(el('#pageSurvey').style.display !== 'none') renderQuestions();
+}
+
+function renderQuestions(){
+  const container = el('#questionsContainer');
+  container.innerHTML = '';
+  questions.forEach((q, idx)=>{
+    const qWrap = document.createElement('div');
+    qWrap.className = 'question';
+    const title = document.createElement('div');
+    title.style.fontWeight='600';
+    title.style.marginBottom='6px';
+    title.textContent = (LANG.current==='ur' && q.ur) ? q.ur : q.en;
+    qWrap.appendChild(title);
+
+    const optionsWrap = document.createElement('div');
+    optionsWrap.className = 'options';
+
+    if(q.type === 'scale'){
+      const row = document.createElement('div');
+      row.style.display='flex'; row.style.gap='6px'; row.style.flexWrap='wrap';
+      for(let i=q.min;i<=q.max;i++){
+        const label = document.createElement('label');
+        label.className = 'opt';
+        label.style.padding='6px 8px';
+        const r = document.createElement('input'); r.type='radio'; r.name=q.id; r.value=i;
+        const span = document.createElement('span'); span.textContent = i;
+        label.appendChild(r); label.appendChild(span);
+        row.appendChild(label);
+      }
+      optionsWrap.appendChild(row);
+    } else if(q.type === 'text'){
+      const ta = document.createElement('textarea');
+      ta.name = q.id; ta.rows=3; ta.style.width='100%';
+      optionsWrap.appendChild(ta);
+    } else if(q.options && q.options.length){
+      q.options.forEach(opt=>{
+        const lab = document.createElement('label');
+        lab.className = 'opt';
+        const input = document.createElement('input');
+        input.type = (q.type === 'checkbox') ? 'checkbox' : 'radio';
+        input.name = q.id;
+        input.value = opt.value;
+        const textSpan = document.createElement('span');
+        textSpan.textContent = (LANG.current==='ur' && opt.ur) ? opt.ur : opt.en;
+        lab.appendChild(input);
+        if(opt.img){
+          const img = document.createElement('img'); img.src = opt.img; img.alt = textSpan.textContent;
+          lab.appendChild(img);
+        }
+        lab.appendChild(textSpan);
+        optionsWrap.appendChild(lab);
+      });
+    }
+
+    qWrap.appendChild(optionsWrap);
+    container.appendChild(qWrap);
+  });
+
+  el('#progress').textContent = `${questions.length} ${LANG.current==='ur' ? 'سوالات' : 'questions'}`;
+}
+
+// Collect responses
+function collectResponse(){
+  const patient = {
+    fullName: el('#fullName').value.trim(),
+    patientId: el('#patientId').value.trim(),
+    age: el('#age').value ? Number(el('#age').value) : ''
+  };
+  const answers = {};
+  questions.forEach(q=>{
+    if(q.type === 'text'){
+      const t = document.querySelector(`textarea[name="${q.id}"]`);
+      answers[q.id] = t ? t.value.trim() : '';
+    } else if(q.type === 'checkbox'){
+      const checked = Array.from(document.querySelectorAll(`input[name="${q.id}"]:checked`)).map(i=>i.value);
+      answers[q.id] = checked;
+    } else {
+      const elSelected = document.querySelector(`input[name="${q.id}"]:checked`);
+      answers[q.id] = elSelected ? elSelected.value : '';
+    }
+  });
+  return {
+    id: `resp_${Date.now()}`,
+    ts: new Date().toISOString(),
+    lang: LANG.current,
+    patient,
+    answers
+  };
+}
+
+// Local storage helpers
+function saveToLocal(response){
+  const key = 'survey_responses';
+  const existing = JSON.parse(localStorage.getItem(key) || '[]');
+  existing.push(response);
+  localStorage.setItem(key, JSON.stringify(existing));
+  return existing.length;
+}
+
+function saveDraft(){
+  const draftKey = 'survey_draft';
+  const resp = collectResponse();
+  localStorage.setItem(draftKey, JSON.stringify(resp));
+  alert(LANG.current==='ur' ? 'خاکہ محفوظ ہوگیا' : 'Draft saved locally');
+}
+
+function loadDraft(){
+  const d = localStorage.getItem('survey_draft');
+  if(!d) { alert(LANG.current==='ur' ? 'کوئی ڈرافٹ نہیں' : 'No draft found'); return; }
+  const resp = JSON.parse(d);
+  el('#fullName').value = resp.patient.fullName || '';
+  el('#patientId').value = resp.patient.patientId || '';
+  el('#age').value = resp.patient.age || '';
+  questions.forEach(q=>{
+    if(q.type === 'text'){
+      const ta = document.querySelector(`textarea[name="${q.id}"]`);
+      if(ta) ta.value = resp.answers[q.id] || '';
+    } else if(q.type === 'checkbox'){
+      document.querySelectorAll(`input[name="${q.id}"]`).forEach(inp=>{
+        inp.checked = (resp.answers[q.id] || []).includes(inp.value);
+      });
+    } else {
+      document.querySelectorAll(`input[name="${q.id}"]`).forEach(inp=>{
+        inp.checked = (resp.answers[q.id] && inp.value==resp.answers[q.id]);
+      });
+    }
+  });
+  alert(LANG.current==='ur' ? 'ڈرافٹ لوڈ ہوگیا' : 'Draft loaded');
+}
+
+// CSV export
+function exportCSV(){
+  const key = 'survey_responses';
+  const rows = JSON.parse(localStorage.getItem(key) || '[]');
+  if(rows.length === 0) { alert(LANG.current==='ur' ? 'کوئی ڈیٹا موجود نہیں' : 'No data to export'); return; }
+
+  const qids = questions.map(q=>q.id);
+  const headers = ['id','ts','lang','fullName','patientId','age', ...qids];
+  const csvRows = [headers.join(',')];
+
+  rows.forEach(r=>{
+    const vals = [
+      csvEscape(r.id),
+      csvEscape(r.ts),
+      csvEscape(r.lang),
+      csvEscape(r.patient.fullName || ''),
+      csvEscape(r.patient.patientId || ''),
+      csvEscape(r.patient.age || '')
+    ];
+    qids.forEach(qid=>{
+      let v = r.answers[qid];
+      if(Array.isArray(v)) v = v.join('|');
+      vals.push(csvEscape(v===undefined ? '' : String(v)));
+    });
+    csvRows.push(vals.join(','));
+  });
+
+  const blob = new Blob([csvRows.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `survey_export_${(new Date()).toISOString().slice(0,19).replace(/[:T]/g,'-')}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function csvEscape(s){
+  if(s==null) s='';
+  if(s.includes(',')||s.includes('"')||s.includes('\n')) {
+    return `"${s.replace(/"/g,'""')}"`;
+  }
+  return s;
+}
+
+// Event wiring
+el('#startSurvey').addEventListener('click', ()=>{
+  if(!el('#fullName').value.trim() || !el('#patientId').value.trim()){
+    alert(LANG.current==='ur' ? 'براہ کرم نام اور مریض آئی ڈی درج کریں۔' : 'Please fill name and patient ID.');
+    return;
+  }
+  el('#pagePatient').style.display = 'none';
+  el('#pageSurvey').style.display = 'block';
+  renderQuestions();
+});
+
+el('#loadLatest').addEventListener('click', ()=> loadDraft());
+el('#saveDraft').addEventListener('click', ()=> saveDraft());
+
+el('#finish').addEventListener('click', ()=>{
+  const response = collectResponse();
+  saveToLocal(response);
+  el('#pageSurvey').style.display = 'none';
+  el('#pageDone').style.display = 'block';
+});
+
+el('#backToStart').addEventListener('click', ()=>{
+  el('#fullName').value = '';
+  el('#patientId').value = '';
+  el('#age').value = '';
+  document.querySelectorAll('#questionsContainer input, #questionsContainer textarea').forEach(i=>{ if(i.type==='radio' || i.type==='checkbox') i.checked=false; else i.value=''; });
+  el('#pageDone').style.display = 'none';
+  el('#pagePatient').style.display = 'block';
+});
+
+el('#exportCsv').addEventListener('click', ()=> exportCSV());
+el('#clearData').addEventListener('click', ()=>{
+  if(confirm(LANG.current==='ur' ? 'کیا آپ واقعی مقامی ڈیٹا حذف کرنا چاہتے ہیں؟' : 'Really clear all local survey data?')){
+    localStorage.removeItem('survey_responses');
+    alert(LANG.current==='ur' ? 'ڈیٹا حذف ہوگیا' : 'Data cleared');
+  }
+});
+
+// Initialize
+applyLanguage();
+renderQuestions();
+
+</script>
+</body>
+</html>
+
