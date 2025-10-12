@@ -1,0 +1,108 @@
+{
+  "questions": [
+    {
+    "id": "distress_score",
+    "type": "scale",
+    "en": "Please circle the number (0–10) that best describes how much distress you have been experiencing in the past week, including today.",
+    "ur": "براہ کرم آپ کو آج سمیت پچھلے ہفتے میں کس قدر تناؤ کا سامنا ہوا ہے اس کی بہترین وضاحت کرنے والے عدد 0–10 پر دائرہ بنائیں۔",
+    "min": 0, "max": 10
+  },
+
+  {
+    "id": "practical_concerns",
+    "type": "checkbox",
+    "en": "Practical Concerns — Mark all that apply",
+    "ur": "عملی تشویشات — جو لاگو ہوں نشان زد کریں",
+    "options": [
+      {"value":"taking_care_of_myself", "en":"Taking care of myself", "ur":"اپنا خیال رکھنا", "img":"images/Pratical Concern/Taking care of myself.JPG"},
+      {"value":"taking_care_of_others", "en":"Taking care of others", "ur":"دوسروں کا خیال رکھنا", "img":"images/Pratical Concern/Taking care of others.JPG"},
+      {"value":"work", "en":"Work", "ur":"کام", "img":"images/Pratical Concern/Work.JPG"},
+      {"value":"school", "en":"School", "ur":"سکول", "img":"images/Pratical Concern/School.JPG"},
+      {"value":"housing", "en":"Housing", "ur":"رہائش", "img":"images/Pratical Concern/Housing.JPG"},
+      {"value":"finances", "en":"Finances", "ur":"مالیات", "img":"images/Pratical Concern/Finances.JPG"},
+      {"value":"insurance", "en":"Insurance", "ur":"بیمہ", "img":"images/Pratical Concern/Insurance.JPG"},
+      {"value":"transportation", "en":"Transportation", "ur":"نقل و حمل", "img":"images/Pratical Concern/Transport.JPG"},
+      {"value":"child_care", "en":"Child care", "ur":"نگہداشت طفل", "img":"images/Pratical Concern/Child care.JPG"},
+      {"value":"food", "en":"Having enough food", "ur":"کافی مقدار میں کھانا", "img":"images/Pratical Concern/Having enough food.JPG"},
+      {"value":"medicines", "en":"Access to medicine", "ur":"ادویات تک رسائی", "img":"images/Pratical Concern/Access to medicine.JPG"},
+      {"value":"treatment_decisions", "en":"Treatment decisions", "ur":"علاج کے فیصلے", "img":"images/Pratical Concern/Treatment decisions.JPG"}
+    ]
+  },
+
+  {
+    "id": "family_concerns",
+    "type": "checkbox",
+    "en": "Family Concerns — Mark all that apply",
+    "ur": "خاندانی تشویشات — جو لاگو ہوں نشان زد کریں",
+    "options": [
+      {"value":"relationship_with_spouse_or_partner", "en":"Relationship with spouse or partner", "ur":"شریک حیات یا ساتھی کے ساتھ تعلقات", "img":"images/Social Concern/Relationship with spouse.JPG"},
+      {"value":"relationship_with_children", "en":"Relationship with children", "ur":"بچوں کے ساتھ تعلقات", "img":"images/Social Concern/Relationship with children.jpeg"},
+      {"value":"relationship_with_family_members", "en":"Relationship with family members", "ur":"خاندان کے افراد کے ساتھ تعلقات", "img":"images/Social Concern/Relationship with family members.JPG"},
+      {"value":"relationship_with_friends_or_coworkers", "en":"Relationship with frends or coworkers", "ur":"دوستوں یا ساتھی کارکنوں کے ساتھ تعلقات", "img":"images/Social Concern/Relationship with friends or co workers.JPG"},
+      {"value":"communication_with_health_care_team", "en":"Communication with health care team", "ur":"صحت کی دیکھ بھال کرنے والی ٹیم کے ساتھمواصلت", "img":"images/Social Concern/Communciation with health care team.JPG"},
+      {"value":"ability_to_have_children", "en":"Ability to have children", "ur":"بچے پیدا کرنے کی اہلیت", "img":"images/Social Concern/Abilty to have children 1.JPG"},
+      {"value":"prejudice_or_discrimination", "en":"Prejudice or discrimination", "ur":"Prejudice or discrimination", "img":""}
+    ]
+  },
+
+  {
+    "id": "emotional_concerns",
+    "type": "checkbox",
+    "en": "Emotional Concerns — Mark all that apply",
+    "ur": "جذباتی تشویشات — جو لاگو ہوں نشان زد کریں",
+    "options": [
+      {"value":"worry", "en":"Worry or Anxiety", "ur":"فکر یا اضطراب", "img":"images/Emotional Concern/Worry or anixety.JPG"},
+      {"value":"sadness", "en":"Sadness or depression", "ur":"اداسی یا افسردگی", "img":"images/Emotional Concern/Sadness or deperssion.JPG"},
+      {"value":"loss_of_interest", "en":"Loss of interest or enjoyment", "ur":"دلچسپی یا لطف اندوزی میں کمی", "img":"images/Emotional Concern/Loss of enjoyment or interest.JPG"},
+      {"value":"grief_or_loss", "en":"Grief or loss", "ur":"غم یا نقصان", "img":"images/Emotional Concern/Grief or loss.JPG"},
+      {"value":"fear", "en":"Fear", "ur":"خوف", "img":"images/Emotional Concern/Fear.JPG"},
+      {"value":"loneliness", "en":"Loneliness", "ur":"تنہائی", "img":"images/Emotional Concern/Loneliness.JPG"},
+      {"value":"anger", "en":"Anger", "ur":"غصہ", "img":"images/Emotional Concern/Anger.JPG"},
+      {"value":"changes_in_apperance", "en":"Changes in appearance", "ur":"بظاہری شکل میں تبدیلیاں", "img":"images/Emotional Concern/Change in physical apperance.jpeg"},
+      {"value":"loss_of_control", "en":"Loss of control", "ur":"ظاہری شکل میں تبدیلیاں", "img":"images/Emotional Concern/Loss of control.png"},
+      {"value":"worthlessness_or_burden", "en":"Feelings of worthlessness or being a burden", "ur":"بیکار ہونے یا بوجھ ہونے کا احساس", "img":"images/Emotional Concern/Feeling of burden or worthlessness.JPG"}
+    ]
+  },
+
+  {
+    "id": "spiritual_concerns",
+    "type": "checkbox",
+    "en": "Spiritual/Religious Concerns — Mark all that apply",
+    "ur": "روحانی/مذہبی تشویشات — جو لاگو ہوں نشان زد کریں",
+    "options": [
+      {"value":"meaning_or_purpose", "en":"Sense of meaning or purpose", "ur":"معنی یا مقصد کا احساس", "img":"images/Spiritual and Religious Concern/Sense of meaning or purpose.png"},
+      {"value":"conflict_with_beliefs", "en":"Changes in faith or beliefs", "ur":"عقیدہ یا عقائد میں تبدیلی", "img":"images/Spiritual and Religious Concern/Changes in faith or beliefs.JPG"},
+      {"value":"death_dying_afterlife", "en":"Death, dying, or afterlife", "ur":"موت، مرنا یا بعد کی زندگی", "img":"images/Spiritual and Religious Concern/Death.JPG"},
+      {"value":"conflict_between_beliefs_and_treatment", "en":"Conflict between beliefs and cancer treatments", "ur":"عقائد اور کینسر کے علاج کے درمیان تصادم", "img":"images/Spiritual and Religious Concern/Conflict between beliefs and cancer treatments.JPG"},
+      {"value":"relationship_with_sacred", "en":"Relationship with the sacred", "ur":"مقدس کے ساتھ رشتہ", "img":"images/Spiritual and Religious Concern/Relationship with the sacred.JPG"},
+      {"value":"ritual_or_dietary_needs", "en":"Ritual or dietary needs", "ur":"رسم یا غذائی ضروریات", "img":"images/Spiritual and Religious Concern/Ritual or dietary needs.JPG"}
+      ]
+  },
+
+  {
+    "id": "physical_problems",
+    "type": "checkbox",
+    "en": "Physical Concerns — Mark all that apply",
+    "ur": "جسمانی مسائل — جو لاگو ہوں نشان زد کریں",
+    "options": [
+      {"value":"pain", "en":"Pain", "ur":"درد", "img":"images/Physical Concern/Pain.JPG"},
+      {"value":"sleep", "en":"Sleep", "ur":"نیند", "img":"images/Physical Concern/Sleep.JPG"},
+      {"value":"fatigue", "en":"Fatigue", "ur":"تھکن", "img":"images/Physical Concern/Fatigue.jpg"},
+      {"value":"changes_in_eating", "en":"Changes in eating", "ur":"کھانے میں تبدیلیاں", "img":"images/Physical Concern/Changes in eating.JPG"},
+      {"value":"tobacco_use", "en":"Tobacco use", "ur":"تمباکو کا استعمال", "img":"images/Physical Concern/Tobacco use.jpg"},
+      {"value":"substance_use", "en":"Substance use", "ur":"ممنوعات کا استعمال", "img":"images/Physical Concern/Substance use.JPG"},
+      {"value":"memory_concentration", "en":"Memory/concentration", "ur":"یادداشت/توجہ", "img":"images/Physical Concern/Memory or concentration.JPG"},
+      {"value":"sexual", "en":"Sexual health", "ur":"جنسی مسائل", "img":"images/Physical Concern/Sexual Health.JPG"},
+      {"value":"changes_in_eating", "en":"Changes in eating", "ur":"کھانے ميں تبديلياں", "img":"images/Physical Concern/Changes in eating.JPG"},
+      {"value":"loss_or_change_of_physical_abilities", "en":"Loss or change of physical abilities", "ur":"جسمانی صلاحیتوں میں کمی یا تبدیلی", "img":"images/Physical Concern/Change in physical abilities.JPG"}
+    ]
+  },
+  {
+    "id": "other_concerns",
+    "type": "text",
+    "en": "Other concerns (optional)",
+    "ur": "دیگر تشویشات (اختیاری)"
+  }
+
+  ]
+}
